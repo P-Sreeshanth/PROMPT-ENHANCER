@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prompt Enhancer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #f5f7fa;
+            --surface-color: #ffffff;
+            --primary-color: #4f46e5;
+            --primary-hover: #4338ca;
+            --text-primary: #1f2937;
+            --text-secondary: #6b7280;
+            --border-color: #e5e7eb;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            width: 800px;
+            height: 600px;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+        .tab-active {
+            background-color: var(--primary-color);
+            color: var(--surface-color);
+        }
+        .tab-inactive {
+            background-color: #eef2ff;
+            color: var(--primary-color);
+        }
+        .card-hover {
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+        .card-hover:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -2px rgb(0 0 0 / 0.1);
+        }
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #eef2ff;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #c7d2fe;
+            border-radius: 8px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #a5b4fc;
+        }
+        .persona-selected {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px #c7d2fe;
+            transform: scale(1.01);
+        }
+        .main-cta {
+            background: linear-gradient(145deg, #6366f1, #4f46e5);
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.2), 0 2px 4px -2px rgba(79, 70, 229, 0.1);
+        }
+        .main-cta:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 8px 12px -3px rgba(79, 70, 229, 0.3), 0 4px 6px -2px rgba(79, 70, 229, 0.2);
+        }
+        .output-block {
+            background-color: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: 0.75rem;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+        .output-block h4 {
+            display: flex;
+            align-items: center;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+         .output-block h4 span {
+            margin-right: 0.5rem;
+            color: var(--primary-color);
+         }
+    </style>
+</head>
+<body class="antialiased">
+
+    <div class="h-full flex flex-col">
+        <div class="w-full h-full bg-var(--surface-color) flex flex-col md:flex-row">
+            
+            <!-- Sidebar / Main Controls -->
+            <div class="w-full md:w-1/2 lg:w-2/5 p-6 border-r border-var(--border-color) flex flex-col">
+                <header class="mb-6">
+                    <h1 class="text-2xl font-bold text-var(--text-primary)">Prompt Enhancer</h1>
+                    <p class="text-var(--text-secondary) mt-1 text-sm">Your AI-powered creative partner.</p>
+                </header>
+
+                <div class="flex-grow">
+                    <label for="prompt-input" class="block text-sm font-medium text-var(--text-secondary) mb-2">Your Prompt</label>
+                    <textarea id="prompt-input" rows="4" class="w-full p-3 border border-var(--border-color) rounded-lg focus:ring-2 focus:ring-var(--primary-color) focus:border-var(--primary-color) transition text-sm" placeholder="e.g., website for a gym"></textarea>
+                    
+                    <div class="mt-4">
+                        <label class="block text-sm font-medium text-var(--text-secondary) mb-2">Selected Persona</label>
+                        <div id="selected-persona-display" class="p-3 bg-gray-50 rounded-lg border border-var(--border-color) flex items-center space-x-3">
+                            <!-- Selected persona shown here -->
+                        </div>
+                    </div>
+                </div>
+
+                <button id="main-enhance-btn" class="w-full main-cta text-white font-bold py-3 px-4 rounded-lg flex items-center justify-center space-x-2 mt-6">
+                    <span>Enhance Prompt</span>
+                </button>
+            </div>
+
+            <!-- Main Content Area -->
+            <div class="w-full md:w-1/2 lg:w-3/5 p-6 flex flex-col bg-gray-50/50">
+                <!-- Mode Switcher -->
+                <div id="mode-switcher" class="flex items-center space-x-2 mb-4 bg-indigo-100/50 p-1 rounded-lg">
+                    <button data-tab="output" class="mode-tab tab-active flex-1 py-2 text-sm font-semibold rounded-md transition-colors duration-200">✨ Output</button>
+                    <button data-tab="personas" class="mode-tab tab-inactive flex-1 py-2 text-sm font-semibold rounded-md transition-colors duration-200">🎭 Personas</button>
+                    <button data-tab="templates" class="mode-tab tab-inactive flex-1 py-2 text-sm font-semibold rounded-md transition-colors duration-200">📚 Templates</button>
+                </div>
+
+                <!-- Tab Content -->
+                <div id="tab-content" class="flex-grow min-h-[400px] overflow-hidden">
+                    <!-- Output Tab -->
+                    <div id="output-panel" class="tab-panel h-full">
+                        <div id="enhancement-output" class="h-full flex flex-col relative">
+                           <div id="enhanced-prompt-content" class="space-y-4 overflow-y-auto h-full">
+                                <!-- Enhanced prompt blocks will be injected here -->
+                                <p class="text-center text-var(--text-secondary) p-8">Your enhanced prompt will appear here.</p>
+                           </div>
+                        </div>
+                    </div>
+
+                    <!-- Personas Tab -->
+                    <div id="personas-panel" class="tab-panel hidden h-full">
+                        <div id="persona-list" class="grid grid-cols-1 lg:grid-cols-2 gap-3 max-h-[450px] overflow-y-auto p-1">
+                            <!-- Personas injected by JS -->
+                        </div>
+                    </div>
+
+                    <!-- Templates Tab -->
+                    <div id="templates-panel" class="tab-panel hidden h-full">
+                         <input id="template-search" type="text" placeholder="🔎 Search templates..." class="w-full mb-4 p-2 border border-var(--border-color) rounded-lg text-sm">
+                        <div id="template-list" class="grid grid-cols-1 gap-3 max-h-[410px] overflow-y-auto p-1">
+                            <!-- Templates injected by JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script src="popup.js"></script>
+</body>
+</html> 
